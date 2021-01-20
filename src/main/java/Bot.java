@@ -5,8 +5,12 @@ import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
+
 import org.openqa.selenium.WebDriver;
 
 
@@ -25,6 +29,8 @@ public class Bot {
     public static final String ANSI_YELLOW = "\u001B[33m";
     public static final String ANSI_CYAN = "\u001B[36m";
     public static ArrayList<Card> cards = new ArrayList<Card>();
+    public static ArrayList<String> brands = new ArrayList<String>();
+    private static final ArrayList<Card> shown = new ArrayList<Card>();
     public static Website newegg = new Website();
     public static Website bestbuy = new Website();
     //public static Website nvidia = new Website(); //DEAD
@@ -72,6 +78,7 @@ public class Bot {
                     newegg3080();
                     newegg3090();
                 }
+                break;
             case 2:
                 if (selection == 1){
                     bestbuy3080();
@@ -83,6 +90,7 @@ public class Bot {
                     bestbuy3080();
                     bestbuy3090();
                 }
+                break;
             case 3:
                 if (selection == 1){
                     amazon3080();
@@ -94,6 +102,7 @@ public class Bot {
                     amazon3080();
                     amazon3090();
                 }
+                break;
             case 4:
                 if (selection == 1){
                     newegg3080();
@@ -113,6 +122,7 @@ public class Bot {
                     bestbuy3090();
                     amazon3090();
                 }
+                break;
             case 5:
                 if (selection == 1){
                     testCards();
@@ -123,14 +133,18 @@ public class Bot {
                 else if (selection == 3){
                     testCards();
                 }
+                break;
             default:
                 System.out.println("Select 1-5");
+                break;
         }
 
+        String brandsLine = scanner.nextLine();
 
-
-
-
+        List<Integer> brands = Arrays.stream(brandsLine.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+        for (Integer brand : brands) {
+            Bot.brands.add(shown.get(brand).getBrand());
+        }
 
         try {
             driver.get(cards.get(0).getUrl());
@@ -140,6 +154,7 @@ public class Bot {
 
             do {
                 for (Card card : cards) {
+                    if (!Bot.brands.contains(card.getBrand())) continue;
                     driver.get(card.getUrl());
                     Thread.sleep((long)(Math.random() * 876));
                     counter++;
@@ -210,13 +225,27 @@ public class Bot {
 
     public static void displayStores(){
         System.out.println("This tool searches both Newegg and Bestbuy for in stock cards");
-        System.out.println("Selections:");
+        System.out.println();
+        System.out.println();
         System.out.println("Selections:");
         System.out.println("1. Newegg");
         System.out.println("2. BestBuy");
         System.out.println("3. Amazon");
         System.out.println("4. All Stores");
         System.out.println("5. Test Alerts");
+
+    }
+
+    public static void displayBrands() {
+        System.out.println("This tool selects the brands you want to search for. If selecting multiple brands, please separate with a comma.");
+        System.out.println();
+        System.out.println();
+        System.out.println("Selections");
+        for (Card card : cards) {
+            if (shown.contains(card)) continue;
+            System.out.println((shown.size() + 1) + ". " + card.getBrand());
+            shown.add(card);
+        }
 
     }
 
